@@ -5,11 +5,6 @@
         <div slot="UserName" slot-scope="event">
           <el-button  @click="deleteRow(event)" type="text" size="small">{{event.data.row.UserName}}</el-button>
         </div>
-        <div slot="IsUsed" slot-scope="event">
-          <el-select v-model="scope.row[scope.column.property]" placeholder="请选择" :disabled="column.isReadonly">
-            <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
-          </el-select>
-        </div>
       </core-list>
     </div>
   </div>
@@ -22,7 +17,15 @@
     name: "UserMain",
     data(){
       return{
-        dwList : null
+        value:"1",
+        dwList : null,
+        options: [{
+          value: '0',
+          label: '锁定'
+        }, {
+          value: '1',
+          label: '正常'
+        }]
       }
     },
     created(){

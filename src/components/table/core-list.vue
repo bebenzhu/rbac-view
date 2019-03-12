@@ -30,17 +30,21 @@
         </el-table-column>
 
         <template v-for="(column,index) in dwList.table.columns" v-if="column.isVisible">
-          <el-table-column v-if="column.type=='String'" :key="index" :prop="column.columnProp" :label="column.columnLabel" :width="column.width" class-name="normal-column"></el-table-column>
+          <!--string和只读-->
+          <el-table-column v-if="column.type=='String'||column.isReadonly" :key="index" :prop="column.columnProp" :label="column.columnLabel"
+                           :width="column.width" class-name="normal-column"/>
 
-          <el-table-column v-if="column.type=='Select'" :key="index" :prop="column.columnProp" :label="column.columnLabel" :width="column.width">
+          <!--下拉框-->
+          <el-table-column v-if="!column.isReadonly&&column.type=='Select'" :key="index" :prop="column.columnProp" :label="column.columnLabel" :width="column.width">
             <template slot-scope="scope">
-              <el-select v-model="scope.row[scope.column.property]" placeholder="请选择" :disabled="column.isReadonly">
+              <el-select v-model="scope.row[scope.column.property]" placeholder="请选择" :disabled="column.isReadonly" size="mini">
                 <el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value"></el-option>
               </el-select>
             </template>
           </el-table-column>
 
-          <el-table-column v-if="column.type=='Slot'" :key="index" :prop="column.columnProp" :label="column.columnLabel" :width="column.width">
+          <!--外部组件-->
+          <el-table-column v-if="!column.isReadonly&&column.type=='Slot'" :key="index" :prop="column.columnProp" :label="column.columnLabel" :width="column.width">
             <template slot-scope="scope">
               <!--针对外部具名插槽-->
               <slot :name="column.columnProp" :data="scope"></slot>
@@ -72,7 +76,6 @@
       props:['dwList'],
       data() {
         return {
-          value:'1',
           options: [{
             value: '0',
             label: '锁定'

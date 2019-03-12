@@ -55,13 +55,14 @@ export default class dwList {
     let p = $.extend({templateNo:templateNo, currentPage:currentPage, pageSize:pageSize},queryParams);
     http.post('/TemplateCtrl/getTemplateData', p).then(r => {
       let result = r.data.body;
-      let columnList = result.cloumns;
-      let dataList = result.datas;
-      let countNumber = result.countNumber;
+      let _columnList = result.cloumns;
+      let _dataList = result.datas;
+      let _queryDataSize = result.queryDataSize;
+      let _codeMap = result.codeMap;
 
-      _this.table.datas = this.handleData(dataList,{});
-      _this.table.dataSize = result.countNumber;
-      _this.handleColumn(_this.table,columnList);
+      _this.handleColumn(_this.table,_columnList);
+      _this.table.datas = this.handleData(_dataList,_columnList,_codeMap);
+      _this.table.dataSize = _queryDataSize;
       resolve(_this.table);
     });
   }
@@ -113,22 +114,34 @@ export default class dwList {
   /**
    * 对原始数据进行处理
    * @param primitiveData
-   * @param maps
+   * @param columnList
+   * @param codeListMap
+   * @returns {Array}
    */
-  handleData = (primitiveData,maps)=>{
+  handleData = (primitiveData,columnList,codeListMap)=>{
     let showDatas = [];
     primitiveData.forEach((rowData)=>{
-
       let showData = Object.assign({},rowData);
       Object.keys(rowData).forEach((key)=>{
         let value = rowData[key];
-        let map = maps[key];
-        if(map){
-          map.forEach((sMap)=>{
-            if(sMap.id===value){
-              showData[key] = sMap.lable;
+
+        let column = columnList.find((c)=>{
+          return c.columnProp === key;
+        });
+        if(column.isReadonly&&column.type=='Select'){//进行转码操作
+          let codeList = codeListMap[column.codeNo];
+          if(codeList&&Array.isArray(codeList)){
+            let code = codeList.find((c)=>{
+              return c.id===value;
+            })
+            if(code){
+              showData[key] = code.name;
+            }else{
+              showData[key] = value;
             }
-          })
+          }else{
+            showData[key] = value;
+          }
         }else{
           showData[key] = value;
         }
